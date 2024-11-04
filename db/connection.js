@@ -1,8 +1,22 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: './db/app.db'
-});
+// Verifica se o ambiente é de produção
+const isProduction = process.env.NODE_ENV === 'production';
 
-module.exports = sequelize
+const sequelize = isProduction
+  ? new Sequelize(process.env.DATABASE_URL, {
+      dialect: 'postgres',
+      protocol: 'postgres',
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false // necessário para muitos serviços de hospedagem
+        }
+      }
+    })
+  : new Sequelize({
+      dialect: 'sqlite',
+      storage: './db/app.db'
+    });
+
+module.exports = sequelize;
